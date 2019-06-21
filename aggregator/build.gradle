@@ -25,6 +25,10 @@ ext {
 
 
 dependencies {
+
+	compile group: 'com.couchbase.client', name: 'java-client', version: '2.7.7'
+
+	// implementation 'org.springframework.boot:spring-boot-starter-data-couchbase'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.apache.kafka:kafka-streams'
@@ -34,7 +38,7 @@ dependencies {
 	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'
 	implementation 'org.springframework.kafka:spring-kafka'
 	
-compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.0'
+	compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '4.1.0'
 	
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

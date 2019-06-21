@@ -23,6 +23,11 @@ import org.apache.kafka.streams.kstream.ValueJoiner;
 import org.apache.kafka.streams.kstream.Windowed;
 
 import com.codahale.metrics.Meter;
+import com.nexmo.aggregator.deser.CallbackDeser;
+import com.nexmo.aggregator.deser.PojoDeser;
+import com.nexmo.aggregator.deser.SubmittedMessageDeser;
+import com.nexmo.aggregator.domain.Callback;
+import com.nexmo.aggregator.domain.SubmittedMessage;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

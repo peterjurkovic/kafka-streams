@@ -1,4 +1,4 @@
-package com.nexmo.aggregator;
+package com.nexmo.aggregator.deser;
 
 import java.io.IOException;
 import java.util.Map;
@@ -8,13 +8,15 @@ import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class PojoDeser<T> implements Deserializer<T>, Serializer<T> {
 
 	static final ObjectMapper mapper = new ObjectMapper()
-			.registerModule(new JavaTimeModule());
+			.registerModule(new JavaTimeModule())
+			.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
 
 	private final Class<T> clazz;
 

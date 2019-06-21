@@ -1,10 +1,12 @@
-package com.nexmo.aggregator;
+package com.nexmo.aggregator.deser;
 
 import java.util.Map;
 
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
+
+import com.nexmo.aggregator.domain.Callback;
 
 public class CallbackDeser extends PojoDeser<Callback> {
 

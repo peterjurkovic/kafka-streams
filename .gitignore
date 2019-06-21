@@ -40,7 +40,8 @@ dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
-
+bin/
+*/bin/
 
 # OS
 .DS_Store

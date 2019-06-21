@@ -32,4 +32,9 @@ public class Metrics {
 		return metrics.meter("delivered-join");
 
 	}
+	
+	public static Meter couchbase() {
+		return metrics.meter("couchbase-lastMo");
+
+	}
 }

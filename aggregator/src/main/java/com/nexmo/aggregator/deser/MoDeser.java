@@ -1,4 +1,4 @@
-package com.nexmo.aggregator;
+package com.nexmo.aggregator.deser;
 
 import java.util.Map;
 
@@ -6,15 +6,18 @@ import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serializer;
 
-public class MessagesDeser extends PojoDeser<Message> {
+import com.nexmo.aggregator.domain.Mo;
 
-	public MessagesDeser() {
-		super(Message.class);
+public class MoDeser extends PojoDeser<Mo>{
+
+	public MoDeser() {
+		super(Mo.class);
+		// TODO Auto-generated constructor stub
 	}
 
-	public static class SerDe implements Serde<Message> {
+	public static class SerDe implements Serde<Mo> {
 
-		private final MessagesDeser serdes = new MessagesDeser();
+		private final MoDeser serdes = new MoDeser();
 
 		@Override
 		public void configure(Map<String, ?> configs, boolean isKey) {
@@ -27,15 +30,14 @@ public class MessagesDeser extends PojoDeser<Message> {
 		}
 
 		@Override
-		public Serializer<Message> serializer() {
+		public Serializer<Mo> serializer() {
 			return serdes;
 		}
 
 		@Override
-		public Deserializer<Message> deserializer() {
+		public Deserializer<Mo> deserializer() {
 			return serdes;
 		}
 
 	}
-
 }

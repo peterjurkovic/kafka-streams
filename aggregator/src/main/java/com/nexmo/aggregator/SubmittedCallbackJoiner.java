@@ -19,6 +19,12 @@ import org.apache.kafka.streams.kstream.Produced;
 import org.apache.kafka.streams.kstream.ValueJoiner;
 
 import com.codahale.metrics.Meter;
+import com.nexmo.aggregator.deser.CallbackDeser;
+import com.nexmo.aggregator.deser.MessagesDeser;
+import com.nexmo.aggregator.deser.SubmittedMessageDeser;
+import com.nexmo.aggregator.domain.Callback;
+import com.nexmo.aggregator.domain.Message;
+import com.nexmo.aggregator.domain.SubmittedMessage;
 
 public class SubmittedCallbackJoiner {
 	
