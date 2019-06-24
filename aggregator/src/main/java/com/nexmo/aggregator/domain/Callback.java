@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class Callback{
-	public String messageid, externalId, type;
+	public String messageid, externalId, type, from, to;
 	public Instant receivedAt;
 }

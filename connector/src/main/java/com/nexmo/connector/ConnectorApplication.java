@@ -22,6 +22,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -74,12 +75,15 @@ class MessageListener {
 @Component
 class MessageProducer {
 	
-	final KafkaTemplate<String, Mo> template;
+	final KafkaTemplate<String, Mo> moTemplate;
+	final KafkaTemplate<String, Callback> cbTemplate;
+	
 	final LoremIpsum gen = LoremIpsum.getInstance();
 
-	public MessageProducer(KafkaTemplate<String, Mo> template) {
-		super();
-		this.template = template;
+	public MessageProducer(KafkaTemplate<String, Mo> moTemplate, 
+						  KafkaTemplate<String, Callback> cbTemplate) {
+		this.moTemplate = moTemplate;
+		this.cbTemplate = cbTemplate;
 	}
 	
 		@Async
@@ -96,11 +100,32 @@ class MessageProducer {
 						            getOrDefaul(country, gen::getCountry),
 						            Instant.now());
 				
-				template.send("messages-mo", message.getId(), message);
+				moTemplate.send("messages-mo", message.getId(), message);
 			}
 			long end = System.currentTimeMillis();
 			log.info("Producing of {} finished in {} ", count, (end-start));
 		}
+		
+		public void produceCb(int count, String from, String to) {
+			long start = System.currentTimeMillis();
+			for(int i = 1; i <= count; i++) {
+				
+				if (i % 10000 == 0)
+					log.info("Producing {} of {}", i, count );
+				
+				Callback cb = new Callback(UUID.randomUUID().toString(), 
+										 "externalId", 
+										 "delivered",
+										 getOrDefaul(from, gen::getPhone),
+										 getOrDefaul(to, gen::getPhone),
+										 Instant.now());
+				
+				cbTemplate.send("callbacks", cb.externalId, cb);
+			}
+			long end = System.currentTimeMillis();
+			log.info("Producing of {} finished in {} ", count, (end-start));
+		}
+		
 		
 		static String getOrDefaul(String val, Supplier<String> f) {
 			return val == null ? f.get() : val;
@@ -120,7 +145,7 @@ class Api{
 	}
 
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/produce/{count}")
+	@PostMapping("/produce/mo/{count}")
 	void produce(@PathVariable int count,
 			 	@RequestParam(required = false) String from,
 				@RequestParam(required = false) String to,
@@ -129,6 +154,17 @@ class Api{
 		log.info("Producing Count {} from {} to {} {} country", count, from, to, country);
 		
 		producer.produce(count, from, to, country);
+	}
+	
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/produce/cb/{count}")
+	void produce(@PathVariable int count,
+			 	@RequestParam(required = false) String from,
+				@RequestParam(required = false) String to) {
+		
+		log.info("Producing Count {} from {} to {}", count, from, to);
+		
+		producer.produceCb(count, from, to);
 	}
 }
 

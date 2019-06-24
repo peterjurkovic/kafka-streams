@@ -1,6 +1,5 @@
 package com.nexmo.aggregator.domain;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SubmittedMessage{
-	public Callback submitted;
-	public Message message;
+public class ByCountryAggregates {
+	long start;
+	long end;
+	String from;
+	String to;
+	Long count;
 }

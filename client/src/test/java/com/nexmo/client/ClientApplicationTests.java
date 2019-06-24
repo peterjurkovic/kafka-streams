@@ -1,4 +1,4 @@
-package com.nexmo.proxy;
+package com.nexmo.client;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,7 +7,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ProxyApplicationTests {
+public class ClientApplicationTests {
 
 	@Test
 	public void contextLoads() {

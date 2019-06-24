@@ -1,10 +1,11 @@
-package com.nexmo.aggregator;
+package com.nexmo.client;
 
 import java.util.concurrent.TimeUnit;
 
 import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 
 public class Metrics {
 
@@ -23,21 +24,12 @@ public class Metrics {
 	}
 	
 	
-	public static Meter submittedMeter() {
-		return metrics.meter("submitted-join");
-
+	public static Meter requestMeter() {
+		return metrics.meter("requests");
 	}
 	
-	public static Meter deliveredMetter() {
-		return metrics.meter("delivered-join");
-
+	public static Timer requestTimer() {
+		return metrics.timer("requests-timer");
 	}
 	
-	public static Meter couchbase() {
-		return metrics.meter("couchbase-lastMo");
-	}
-	
-	public static Meter agg() {
-		return metrics.meter("aggregated");
-	}
 }
