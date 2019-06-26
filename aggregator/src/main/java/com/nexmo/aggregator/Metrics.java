@@ -19,7 +19,7 @@ public class Metrics {
 			       .convertDurationsTo(TimeUnit.MILLISECONDS)
 			       .build();
 		
-		reporter.start(5, TimeUnit.SECONDS);
+		reporter.start(10, TimeUnit.SECONDS);
 	}
 	
 	
@@ -37,7 +37,11 @@ public class Metrics {
 		return metrics.meter("couchbase-lastMo");
 	}
 	
-	public static Meter agg() {
-		return metrics.meter("aggregated");
+	public static Meter aggBySender() {
+		return metrics.meter("aggregatedBySender");
+	}
+	
+	public static Meter aggByLastMo() {
+		return metrics.meter("aggregatedByLastMo");
 	}
 }

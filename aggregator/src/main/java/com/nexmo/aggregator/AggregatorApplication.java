@@ -2,10 +2,12 @@ package com.nexmo.aggregator;
 
 import static com.nexmo.aggregator.AggregatorApplication.LATEST_MO_STORE;
 import static com.nexmo.aggregator.AggregatorApplication.WINDOW_SIZE_MS;
-
+import static org.apache.kafka.streams.kstream.Suppressed.BufferConfig.unbounded;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.Bytes;
@@ -14,10 +16,13 @@ import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Materialized;
 import org.apache.kafka.streams.kstream.Serialized;
+import org.apache.kafka.streams.kstream.Suppressed;
+import org.apache.kafka.streams.kstream.Suppressed.StrictBufferConfig;
 import org.apache.kafka.streams.kstream.TimeWindows;
 import org.apache.kafka.streams.kstream.Windowed;
 import org.apache.kafka.streams.state.WindowStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,6 +30,10 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.Input;
 import org.springframework.cloud.stream.annotation.Output;
 import org.springframework.cloud.stream.annotation.StreamListener;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.kafka.core.CleanupConfig;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
 
@@ -41,16 +50,25 @@ import com.nexmo.aggregator.domain.Mo;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @EnableBinding(Bindings.class)
 @SpringBootApplication
-public class AggregatorApplication {
+public class AggregatorApplication{
 
 	public static final String LATEST_MO_STORE = "LatestMo";
 	public static final String MT_BY_COUNTRY_STORE = "CountByCountry";
 	public static final int WINDOW_SIZE_MS = 60_000 * 60 * 5;
 	
+	@Value("${spring.cloud.stream.kafka.streams.binder.configuration.application.server}")
+	String serverUrl;
+	
 	public static void main(String[] args) {
 		SpringApplication.run(AggregatorApplication.class, args);
+	}
+	
+	@PostConstruct
+	void printAppUrl() {
+		log.info(serverUrl);
 	}
 }
 
@@ -61,12 +79,14 @@ class LatestMoAggregator {
 	@SendTo(Bindings.MO_LATEST_OUT)
 	@StreamListener(Bindings.MO)
 	public KStream<?, ?> aggregateLastMo(KStream<String, Mo> messages) {
-	
+		 Meter meter = Metrics.aggByLastMo();
+		 
 		 return  messages.selectKey((key,message) -> message.from + "#" + message.to)
 						 .map((k,v) -> new KeyValue<>(k, v.receivedAt.toString()))
 						 .groupByKey()
 						 .reduce((oldTimestamp, newTimestamp) -> newTimestamp, Materialized.as(LATEST_MO_STORE))
-						 .toStream();
+						 .toStream()
+						 .peek((k,v) -> {meter.mark();});
 	}
 }
 
@@ -77,14 +97,13 @@ class DeliveredMtByCountry {
 	@SendTo(Bindings.MT_COUNTRY_COUNT)
 	@StreamListener(Bindings.CALLBACKS)
 	public KStream<?, ?> deliverdCount(KStream<String, Callback> callbacks) {
-	Meter meter = Metrics.agg();
+	Meter meter = Metrics.aggBySender();
 	return callbacks.filter((k,callback) -> callback.type.equals("delivered"))
 		    			   .map((k,v) -> new KeyValue<>(v.from +"#"+v.to, v.messageid))
 					 	   .groupByKey(Serialized.with(Serdes.String(), Serdes.String()))
-					 	   // .windowedBy(TimeWindows.of(WINDOW_SIZE_MS).advanceBy(WINDOW_SIZE_MS).until(WINDOW_SIZE_MS*2))
 					 	   .windowedBy(new DailyTimeWindows(ZoneId.of("UTC"), 0, Duration.ZERO))
 					 	   .count(Materialized.<String, Long, WindowStore<Bytes,byte[]>>as(AggregatorApplication.MT_BY_COUNTRY_STORE).withCachingEnabled())
-					 	   
+					 	   .suppress(Suppressed.untilWindowCloses(unbounded()))
 					 	   .toStream()
 					 	   .peek((k,v) -> meter.mark())
 					 	   .map(new KeyValueMapper<Windowed<String>, Long, KeyValue<String,ByCountryAggregates>>() { 
@@ -160,4 +179,16 @@ interface Bindings{
 class FromTo{
 	@Id String id;
 	@Field Instant receivedAt;
+}
+
+@Slf4j
+@Configuration
+class KafkaConf{
+	
+	@Bean
+	@Primary
+	public CleanupConfig cleanupConfig() {
+		return new CleanupConfig(false, false);
+	}
+	
 }

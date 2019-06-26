@@ -106,6 +106,7 @@ class MessageProducer {
 			log.info("Producing of {} finished in {} ", count, (end-start));
 		}
 		
+		@Async
 		public void produceCb(int count, String from, String to) {
 			long start = System.currentTimeMillis();
 			for(int i = 1; i <= count; i++) {

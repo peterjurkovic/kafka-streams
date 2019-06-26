@@ -20,6 +20,9 @@ import org.apache.kafka.streams.state.QueryableStoreTypes;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
 import org.apache.kafka.streams.state.ReadOnlyWindowStore;
 import org.springframework.cloud.stream.binder.kafka.streams.InteractiveQueryService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.core.CleanupConfig;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -85,7 +88,7 @@ public class AggLookup {
 		}
 		
 		String url = "http://" + hostInfo.host() + ":" + hostInfo.port() + "/"+Type.VOLUME.path+"?to=" + to + "&from=" + from;
-		log.info("Seinding remote request {}", url);
+		log.info("Sending remote request {}", url);
 		return client.get()
 					 .uri(url)
 					 .retrieve()
@@ -139,3 +142,5 @@ public class AggLookup {
 		return Instant.ofEpochMilli(timestamp).toString();
 	}
 }
+
+

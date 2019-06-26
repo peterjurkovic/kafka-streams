@@ -54,4 +54,9 @@ public class DailyTimeWindows extends Windows<TimeWindow>{
     private long toEpochMilli(final ZonedDateTime zonedDateTime) {
         return zonedDateTime.toInstant().toEpochMilli();
 }
+
+	@Override
+	public long gracePeriodMs() {
+		return 100;
+	}
 }

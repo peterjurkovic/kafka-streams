@@ -20,7 +20,7 @@ public class Metrics {
 			       .convertDurationsTo(TimeUnit.MILLISECONDS)
 			       .build();
 		
-		reporter.start(5, TimeUnit.SECONDS);
+		reporter.start(10, TimeUnit.SECONDS);
 	}
 	
 	

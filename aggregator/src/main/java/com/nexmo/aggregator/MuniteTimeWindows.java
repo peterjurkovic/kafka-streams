@@ -19,4 +19,9 @@ public class MuniteTimeWindows extends Windows<TimeWindow> {
 		return 0;
 	}
 
+	@Override
+	public long gracePeriodMs() {
+		return 100;
+	}
+
 }

@@ -24,6 +24,7 @@ ext {
 	set('springCloudVersion', "Greenwich.SR1")
 }
 
+ext['kafka.version'] = '2.2.1'
 
 dependencies {
 
